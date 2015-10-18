@@ -11,7 +11,8 @@ keep_md: true
 
 Unzip the activity data and load it into R:
 
-```{r echo=TRUE}
+
+```r
 unzip("activity.zip")
 rawData <- read.csv("activity.csv")
 ```
@@ -24,27 +25,42 @@ Note: for this part of the assignment, we will ignore the missing values in the 
 
 1. First we calculate the total number of steps taken per day:
 
-```{r echo=TRUE}
+
+```r
 stepsPerDay <- aggregate(rawData$steps, list(rawData$date), sum)
 colnames(stepsPerDay) <- c("date", "steps")
 ```
 
 2. We show this aggregated data in a histogram:
 
-```{r echo=TRUE, fig.width=15}
+
+```r
 hist(stepsPerDay$steps, col="black", main="Total steps per day", xlab="Steps per day")
 ```
 
+![plot of chunk unnamed-chunk-3](figure/unnamed-chunk-3-1.png) 
+
 3. Calculate and report the mean and median of the total number of steps taken per day:
 
-```{r echo=TRUE}
+
+```r
 # Mean
 stepsPerDayMean <- mean(stepsPerDay$steps, na.rm=TRUE)
 print(stepsPerDayMean)
+```
 
+```
+## [1] 10766.19
+```
+
+```r
 #Median
 stepsPerDayMedian <- median(stepsPerDay$steps, na.rm=TRUE)
 print(stepsPerDayMedian)
+```
+
+```
+## [1] 10765
 ```
 
 
@@ -53,23 +69,32 @@ print(stepsPerDayMedian)
 
 1. Aggregate the steps by interval:
 
-```{r echo=TRUE}
+
+```r
 intervalSteps <- aggregate(data=rawData, steps~interval, FUN=mean, na.action=na.omit)
 colnames(intervalSteps) <- c("interval", "steps")
 ```
 
 2. Create a plot from the aggregated data:
 
-```{r echo=TRUE, fig.width=15}
+
+```r
 plot(x=intervalSteps$interval, y=intervalSteps$steps, type="l", main="Average steps per interval", 
      xlab="5-minute interval", ylab="Average steps across all days")
 ```
 
+![plot of chunk unnamed-chunk-6](figure/unnamed-chunk-6-1.png) 
+
 3. As we can see from this graph, the interval with the maximum number of steps is the following:
 
-```{r echo=TRUE}
+
+```r
 maxInterval <- intervalSteps[intervalSteps$steps==max(intervalSteps$steps),c(1)]
 print(maxInterval)
+```
+
+```
+## [1] 835
 ```
 
 
@@ -78,14 +103,20 @@ print(maxInterval)
 
 1. Number of rows with NAs in the data:
 
-```{r echo=TRUE}
+
+```r
 countNAs <- nrow(subset(rawData, is.na(rawData$steps)))
 print(countNAs)
 ```
 
+```
+## [1] 2304
+```
+
 2. The NAs are replaced by the median values:
 
-```{r echo=TRUE}
+
+```r
 stepValues <- data.frame(rawData$steps)
 stepValues[is.na(stepValues),] <- tapply(X=rawData$steps,INDEX=rawData$interval,FUN=median,na.rm=TRUE)
 filledData <- cbind(stepValues, rawData[,2:3])
@@ -97,27 +128,42 @@ Now we will replicate the analysis we did at the beginning of this assignment bu
 
 1. First we calculate the total number of steps taken per day:
 
-```{r echo=TRUE}
+
+```r
 filledStepsPerDay <- aggregate(filledData$steps, list(filledData$date), sum)
 colnames(filledStepsPerDay) <- c("date", "steps")
 ```
 
 2. We show this aggregated data in a histogram:
 
-```{r echo=TRUE, fig.width=15}
+
+```r
 hist(filledStepsPerDay$steps, col="black", main="Total steps per day", xlab="Steps per day")
 ```
 
+![plot of chunk unnamed-chunk-11](figure/unnamed-chunk-11-1.png) 
+
 3. Calculate and report the mean and median of the total number of steps taken per day:
 
-```{r echo=TRUE}
+
+```r
 # Mean
 filledStepsPerDayMean <- mean(filledStepsPerDay$steps, na.rm=TRUE)
 print(filledStepsPerDayMean)
+```
 
+```
+## [1] 9503.869
+```
+
+```r
 #Median
 filledStepsPerDayMedian <- median(filledStepsPerDay$steps, na.rm=TRUE)
 print(filledStepsPerDayMedian)
+```
+
+```
+## [1] 10395
 ```
 
 As we can see comparing the analysis made on both datasets the values differ, being lower with the NAs.
@@ -130,7 +176,8 @@ In any case we can conclude that having NAs in the data has a big impact on the 
 
 1. Create a new factor variable in the dataset with two levels - "weekday" and "weekend" indicating whether a given date is a weekday or weekend day:
 
-```{r echo=TRUE}
+
+```r
 dayType <- data.frame(sapply(X=filledData$date, FUN=function(day) {
     if (weekdays(as.Date(day)) %in% c("Saturday", "Sunday", "sábado", "domingo")) {
         day <- "weekend"
@@ -146,13 +193,15 @@ colnames(filledData) <- c("steps", "date", "interval", "dayType")
 
 2. Aggregate the number of steps by this new variable and interval:
 
-```{r echo=TRUE, tidy=FALSE}
+
+```r
 dayTypeIntervalSteps <- aggregate(data=filledData, steps ~ dayType + interval, FUN=mean)
-```  
+```
 
 3. Make a panel plot containing a time series plot of the 5-minute interval and the average number of steps taken, averaged across all weekday days or weekend days:
 
-```{r echo=TRUE, fig.width=15}
+
+```r
 library("lattice")
 
 xyplot(
@@ -164,5 +213,7 @@ xyplot(
     layout=c(1,2)
 )
 ```
+
+![plot of chunk unnamed-chunk-15](figure/unnamed-chunk-15-1.png) 
 
 
